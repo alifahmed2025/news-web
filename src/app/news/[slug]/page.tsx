@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button'; 
 
+// ডেটা স্ট্রাকচারের জন্য ইন্টারফেস (ঠিক আছে)
 interface NewsItem {
   id: number;
   title: string;
@@ -15,13 +16,28 @@ interface NewsItem {
   };
 }
 
-export default async function NewsPage({ params }: { params: { slug: string } }) {
-  const res = await fetch(`https://fakestoreapi.com/products/${params.slug}`);
-  if (!res.ok) return notFound();
+// ✅ এরর ফিক্স: Page Props-এর জন্য type ব্যবহার করা হলো (যাতে বিল্ড এরর না আসে)
+type NewsPageProps = {
+  params: { [key: string]: string }; // জেনিরিক টাইপ ব্যবহার করা হলো
+};
+
+
+// Page Component
+export default async function NewsPage({ params }: NewsPageProps) {
+  
+  // params অবজেক্ট থেকে slug ডি-স্ট্রাকচার করা
+  const { slug } = params; 
+  
+  // API কল
+  const res = await fetch(`https://fakestoreapi.com/products/${slug}`); 
+
+  if (!res.ok) {
+    return notFound();
+  }
 
   const item: NewsItem = await res.json();
 
-  // Auto-expand description if too short
+  // Description Auto-expansion logic (ঠিক আছে)
   const expandedDescription =
     item.description.length > 500
       ? item.description
@@ -60,13 +76,15 @@ export default async function NewsPage({ params }: { params: { slug: string } })
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
+                {/* মূল্য এবং রেটিং ডিসপ্লে করা */}
                 {/* <span className="text-2xl font-semibold text-green-600">৳{item.price}</span> */}
                 {/* <span className="text-sm text-gray-500">
                   ⭐ {item.rating.rate} ({item.rating.count} reviews)
                 </span> */}
               </div>
-{/* 
-              <Button className="w-full md:w-auto px-6 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200">
+              
+              {/* বাটন (যদি Button কম্পোনেন্ট থাকে তবে Uncomment করুন) */}
+              {/* <Button className="w-full md:w-auto px-6 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200">
                 🛒 Add to Cart
               </Button> */}
             </div>
